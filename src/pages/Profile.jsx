@@ -47,6 +47,15 @@ export default function Profile() {
       setUser(data.user);
     });
 
+  const saveColor = (color) => {
+    setProfile((p) => ({ ...p, avatarColor: color }));
+    if (color === user.avatarColor) return;
+    run('color', async () => {
+      const data = await api('/auth/me', { method: 'PUT', body: { avatarColor: color } });
+      setUser(data.user);
+    });
+  };
+
   const savePassword = () =>
     run('password', async () => {
       if (pw.newPassword.length < 6) throw new Error('La nueva contraseña debe tener al menos 6 caracteres');
@@ -74,17 +83,41 @@ export default function Profile() {
           <Badge className="mt-2 bg-rosa-100 text-rosa-700">{ROLE_LABELS[user.role]}</Badge>
           {profile.bio && <p className="mt-3 text-sm text-ink-soft">{profile.bio}</p>}
           <div className="mt-5 w-full">
-            <p className="label">Color de tu avatar</p>
-            <div className="flex flex-wrap justify-center gap-2">
+            <p className="label">Color de tu avatar (se guarda al instante)</p>
+            <div className="flex flex-wrap items-center justify-center gap-2">
               {AVATAR_COLORS.map((c) => (
                 <button
                   key={c}
-                  onClick={() => setProfile({ ...profile, avatarColor: c })}
-                  className={`h-8 w-8 rounded-full ring-offset-2 transition ${profile.avatarColor === c ? 'ring-2 ring-rosa-500' : ''}`}
+                  type="button"
+                  onClick={() => saveColor(c)}
+                  className={`flex h-8 w-8 items-center justify-center rounded-full ring-offset-2 transition hover:scale-110 ${
+                    profile.avatarColor?.toLowerCase() === c.toLowerCase() ? 'ring-2 ring-rosa-500' : ''
+                  }`}
                   style={{ backgroundColor: c }}
                   aria-label={`Color ${c}`}
-                />
+                  aria-pressed={profile.avatarColor?.toLowerCase() === c.toLowerCase()}
+                >
+                  {profile.avatarColor?.toLowerCase() === c.toLowerCase() && <Check className="h-4 w-4 text-ink" />}
+                </button>
               ))}
+              <label
+                className="relative flex h-8 w-8 cursor-pointer items-center justify-center rounded-full border-2 border-dashed border-rosa-300 text-xs font-semibold text-rosa-600 hover:scale-110"
+                title="Elegir otro color"
+              >
+                +
+                <input
+                  type="color"
+                  className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                  value={/^#[0-9a-f]{6}$/i.test(profile.avatarColor || '') ? profile.avatarColor : '#f48fb1'}
+                  onChange={(e) => setProfile((p) => ({ ...p, avatarColor: e.target.value }))}
+                  onBlur={(e) => saveColor(e.target.value)}
+                />
+              </label>
+            </div>
+            <div className="mt-2 h-5 text-center">
+              {state.color?.saving && <span className="text-xs text-ink-muted">Guardando…</span>}
+              <Saved show={state.color?.saved} />
+              {state.color?.error && <span className="text-xs text-red-600">{state.color.error}</span>}
             </div>
           </div>
         </Card>

@@ -1,0 +1,26 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body {
+    @apply bg-rosa-50 text-ink antialiased;
+  }
+  body {
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .input {
+    @apply w-full rounded-xl border border-rosa-200 bg-white px-3 py-2 text-sm text-ink placeholder:text-ink-muted
+      focus:border-rosa-300 focus:outline-none focus:ring-4 focus:ring-rosa-100 disabled:bg-rosa-50;
+  }
+  .label {
+    @apply mb-1 block text-xs font-medium text-ink-soft;
+  }
+  .card {
+    @apply rounded-2xl border border-rosa-100 bg-white shadow-soft;
+  }
+}
